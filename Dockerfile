@@ -20,4 +20,4 @@ ARG JAR_FILE=target/hotel-0.0.1-SNAPSHOT.jar
 EXPOSE 8080
 
 # Command to run Spring Boot app
-ENTRYPOINT ["java","-jar","/app/${JAR_FILE}"]
+ENTRYPOINT ["java","-jar","/app/target/hotel-0.0.1-SNAPSHOT.jar"]
