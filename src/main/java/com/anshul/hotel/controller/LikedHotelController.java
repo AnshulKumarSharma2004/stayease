@@ -1,5 +1,6 @@
 package com.anshul.hotel.controller;
 
+import com.anshul.hotel.dtos.HotelResponseDTO;
 import com.anshul.hotel.model.Hotel;
 import com.anshul.hotel.model.LikedHotel;
 import com.anshul.hotel.model.User;
@@ -57,7 +58,7 @@ public class LikedHotelController {
         return likedHotelService.removeHotel(user, hotel);
     }
     @GetMapping
-    public List<Hotel> getLikedHotels() {
+    public List<HotelResponseDTO> getLikedHotels() {
         // Get authenticated user
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
