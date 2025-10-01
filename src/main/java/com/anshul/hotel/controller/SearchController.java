@@ -42,16 +42,47 @@ public class SearchController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 @GetMapping("/rooms")
-    public ResponseEntity<List<RoomResponseDTO>> searchRooms(@RequestParam  ObjectId hotelId,@RequestParam(required = false)String type, @RequestParam(required = false)double minPrice,@RequestParam(required = false) double maxPrice){
+    public ResponseEntity<List<RoomResponseDTO>> searchRooms(@RequestParam  String hotelId,@RequestParam(required = false)String type, @RequestParam(required = false)Double minPrice,@RequestParam(required = false) Double maxPrice){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-        List<RoomResponseDTO> rooms = roomService.searchRooms(hotelId, type, minPrice, maxPrice);
+    ObjectId objectId = new ObjectId(hotelId);
+        List<RoomResponseDTO> rooms = roomService.searchRooms(objectId, type, minPrice, maxPrice);
         if (rooms != null && !rooms.isEmpty()) {
             return new ResponseEntity<>(rooms, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+    @GetMapping("hotels/nearby")
+    public ResponseEntity<List<HotelResponseDTO>> getNearByHotels(@RequestParam String city){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        List<HotelResponseDTO> hotels = hotelService.searchHotelsByCity(city);
+        return ResponseEntity.ok(hotels);
+
+    }
+    @GetMapping("/hotels/top-rated")
+    public ResponseEntity<List<HotelResponseDTO>> getHotelsByRating() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+
+        List<HotelResponseDTO> hotels = hotelService.getHotelsSortedByRatingDesc();
+
+        if (hotels != null && !hotels.isEmpty()) {
+            return new ResponseEntity<>(hotels, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+
 }

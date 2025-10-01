@@ -31,9 +31,15 @@ public class JWTFilter extends OncePerRequestFilter {
        try{
            String userName = jwtUtility.extractUsername(token);
            String role = jwtUtility.extractRole(token);
+           System.out.println("===== JWT Filter Debug =====");
+           System.out.println("Token: " + token);
+           System.out.println("Extracted username: " + userName);
+           System.out.println("Extracted role: " + role);
            if (userName!=null && SecurityContextHolder.getContext().getAuthentication()==null){
                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userName, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role)));
+               System.out.println("Setting authorities: ROLE_" + role);
                SecurityContextHolder.getContext().setAuthentication(authToken);
+               System.out.println("Current Authentication: " + SecurityContextHolder.getContext().getAuthentication());
 
 
            }

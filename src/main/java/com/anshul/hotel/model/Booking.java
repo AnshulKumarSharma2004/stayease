@@ -25,4 +25,7 @@ public class Booking {
     private User customer;
    @DBRef
     private Room room;
+   private double totalPrice;
+    private String checkOutTime;
+    private Integer rating;
 }

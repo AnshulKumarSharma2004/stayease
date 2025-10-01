@@ -41,7 +41,7 @@ public class JWTUtility {
         claims.put("name",userName);
 
         if ("Hotel_Admin".equals(role)) {
-            claims.put("hotelId", id);   // hotelId for admin
+            claims.put("adminId", id);   // hotelId for admin
         } else if ("User".equals(role)) {
             claims.put("userId", id);    // userId for customer
         }

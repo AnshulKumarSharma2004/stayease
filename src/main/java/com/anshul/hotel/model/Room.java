@@ -9,6 +9,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+
 @Document(collection = "rooms")
 @Data
 @AllArgsConstructor
@@ -20,8 +22,9 @@ public class Room {
     private String roomNumber;
     private String type;
     private Double price;
-    private Boolean available;
-
+    @Builder.Default
+    private Boolean available=true;
+    private List<String> imageUrls;
 
     @DBRef
     private Hotel hotel;   // hotel ref

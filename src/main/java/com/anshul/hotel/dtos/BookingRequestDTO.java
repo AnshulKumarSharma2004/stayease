@@ -13,4 +13,5 @@ public class BookingRequestDTO {
     private Date checkIn;
     private Date checkOut;
         private int guests;
+        private double totalPrice;
 }

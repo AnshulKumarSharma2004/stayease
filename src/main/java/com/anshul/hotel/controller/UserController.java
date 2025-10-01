@@ -31,7 +31,7 @@ public class UserController {
 
     return ResponseEntity.ok(dto);
 }
-@PutMapping("/profile")
+@PutMapping("/updateProfile")
 public ResponseEntity<UserProfileDTO> updateProfile(@RequestBody UserProfileDTO updatedDTO){
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     String emailFromJWT = auth.getName();

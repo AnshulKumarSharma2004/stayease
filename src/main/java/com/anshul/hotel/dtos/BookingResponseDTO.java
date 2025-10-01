@@ -17,4 +17,8 @@ public class BookingResponseDTO {
     private Date checkOut;
     private int guests;
     private String status;
+    private double totalPrice;
+    private String customerName;
+    private String checkOutTime;
+    private Integer rating;
 }

@@ -10,6 +10,7 @@ import com.anshul.hotel.repositories.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,9 +23,11 @@ public class RoomService {
     private HotelRepository hotelRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ImageUploadService cloudinaryService;
 
 
-    public Room addRoom(String hotelIdHex, Room room , String adminEmail){
+    public Room addRoom(String hotelIdHex, Room room , String adminEmail, List<MultipartFile> images){
         ObjectId hotelId = new ObjectId(hotelIdHex);
        User admin =  userRepository.findByEmail(adminEmail)
                 .orElseThrow(()-> new RuntimeException("Admin Not Found"));
@@ -34,6 +37,13 @@ public class RoomService {
        if (!hotel.getAdmin().getId().equals(admin.getId())){
            throw new RuntimeException("You cannot add room to another hotel");
        }
+        if (room.getAvailable() == null) {
+            room.setAvailable(true);
+        }
+        if (images!=null && !images.isEmpty()){
+     List<String> imageUrls = images.stream().map(file-> cloudinaryService.uploadImage(file, "hotels/" + admin.getId().toHexString() + "/rooms/" + room.getRoomNumber())).toList();
+     room.setImageUrls(imageUrls);
+        }
        room.setHotel(hotel);
        return roomRepository.save(room);
     }
@@ -51,7 +61,7 @@ public class RoomService {
         return roomRepository.findByHotel(hotel);
     }
 
-    public Room updateRoom(String roomIdHex, Room reqRoom, String adminEmail){
+    public Room updateRoom(String roomIdHex, Room reqRoom, String adminEmail,List<MultipartFile> newImages){
         ObjectId roomId = new ObjectId(roomIdHex);
         Room existingRoom = roomRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Room Not Found"));
@@ -73,7 +83,21 @@ public class RoomService {
         if (reqRoom.getAvailable() != null) {
             existingRoom.setAvailable(reqRoom.getAvailable());
         }
-
+    if(newImages!=null && !newImages.isEmpty()){
+        if (existingRoom.getImageUrls() != null && !existingRoom.getImageUrls().isEmpty()) {
+            existingRoom.getImageUrls().forEach(url -> {
+                cloudinaryService.deleteImage(url);  // helper method to delete
+            });
+        }
+        List<String> newImageUrls = newImages.stream()
+                .map(file -> cloudinaryService.uploadImage(
+                        file,
+                        "hotels/" + hotel.getAdmin().getId().toHexString() +
+                                "/rooms/" + existingRoom.getRoomNumber()
+                ))
+                .toList();
+        existingRoom.setImageUrls(newImageUrls);
+    }
 
         return roomRepository.save(existingRoom);
     }
@@ -88,7 +112,9 @@ public class RoomService {
         if (!hotel.getAdmin().getEmail().equals(adminEmail)) {
             throw new RuntimeException("Not authorized to delete this room");
         }
-
+        if (room.getImageUrls() != null && !room.getImageUrls().isEmpty()) {
+            room.getImageUrls().forEach(url -> cloudinaryService.deleteImage(url));
+        }
         roomRepository.delete(room);
     }
 
@@ -107,11 +133,13 @@ public class RoomService {
 
     private RoomResponseDTO convertToRoomResponseDTO(Room room) {
         return new RoomResponseDTO(
-                room.getId().toHexString(),        // ObjectId → String
+                room.getId().toHexString(),   // ObjectId → String
+                room.getRoomNumber(),
                 room.getType(),
                 room.getPrice(),
                 room.getAvailable(),
-                room.getHotel() != null ? room.getHotel().getName() : null // hotel name
+                room.getHotel() != null ? room.getHotel().getName() : null ,// hotel name
+                room.getImageUrls()
         );
     }
 }

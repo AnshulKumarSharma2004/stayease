@@ -33,18 +33,15 @@ public class BookingController {
                booking.getCheckIn(),
                booking.getCheckOut(),
                booking.getGuests(),
-               booking.getStatus()
+               booking.getStatus(),
+               booking.getTotalPrice(),
+               booking.getCustomer().getName(),
+               booking.getCheckOutTime(),
+               booking.getRating()
        );
        return new ResponseEntity<>(responseDTO,HttpStatus.OK);
     }
- @GetMapping("/myBookings")
-    public ResponseEntity<List<BookingResponseDTO>> getMyBookings(Authentication auth){
-         String email = auth.getName();
-        User customer = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User Not Found"));
-        List<BookingResponseDTO> customerBookingDTO = bookingService.getCustomerBookingDTO(customer.getId().toHexString());
-        return new ResponseEntity<>(customerBookingDTO,HttpStatus.OK);
-    }
+
 @DeleteMapping("/cancelBooking/{bookingId}")
     public ResponseEntity<BookingResponseDTO> cancelBooking(@PathVariable String bookingId, Authentication auth){
      String email = auth.getName();
@@ -53,5 +50,61 @@ public class BookingController {
     BookingResponseDTO responseDTO = bookingService.cancelBooking(bookingId, customer.getId().toHexString());
     return new ResponseEntity<>(responseDTO,HttpStatus.OK);
 }
+
+    @GetMapping("/pastBookings")
+    public ResponseEntity<List<BookingResponseDTO>> getPastBookings(Authentication auth) {
+        String email = auth.getName();
+        User customer = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User Not Found"));
+
+        List<BookingResponseDTO> response = bookingService.getPastBookings(customer.getId().toHexString());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/currentBookings")
+    public ResponseEntity<List<BookingResponseDTO>> getCurrentBookings(Authentication auth) {
+        String email = auth.getName();
+        User customer = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User Not Found"));
+
+        List<BookingResponseDTO> response = bookingService.getCurrentBookings(customer.getId().toHexString());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @PostMapping("requestCheckIn/{bookingId}")
+    public ResponseEntity<BookingResponseDTO> requestCheckIn(@PathVariable String bookingId, Authentication auth){
+        String email = auth.getName();
+        User customer = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        BookingResponseDTO updatedBooking = bookingService
+                .requestCheckIn(bookingId, customer.getId().toHexString());
+        return new ResponseEntity<>(updatedBooking, HttpStatus.OK);
+    }
+
+    @PostMapping("/requestCheckOut/{bookingId}")
+    public ResponseEntity<BookingResponseDTO> requestCheckOut(@PathVariable String bookingId, Authentication auth) {
+        String email = auth.getName();
+        User customer = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        BookingResponseDTO updatedBooking = bookingService
+                .requestCheckOut(bookingId, customer.getId().toHexString());
+
+        return new ResponseEntity<>(updatedBooking, HttpStatus.OK);
+    }
+    @PostMapping("rate/{bookingId}")
+    public ResponseEntity<BookingResponseDTO> rateBooking( @PathVariable String bookingId,
+                                                           @RequestParam int rating,
+                                                           Authentication auth){
+    String email = auth.getName();
+        User customer = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        BookingResponseDTO responseDTO = bookingService.rateBooking(
+                bookingId,
+                customer.getId().toHexString(),
+                rating
+        );
+        return ResponseEntity.ok(responseDTO);
+
+    }
 
 }
