@@ -41,6 +41,12 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Room Not Found"));
 // checkIn and checkOut check krta hai overlaps ke liye
         List<Booking> conflicts = bookingRepository.findByRoomIdAndCheckOutAfterAndCheckInBefore(roomId, requestDTO.getCheckIn(), requestDTO.getCheckOut());
+        conflicts = conflicts.stream()
+                .filter(b -> b.getStatus().equals("BOOKED")
+                        || b.getStatus().equals("CHECKED_IN")
+                        || b.getStatus().equals("PENDING_CHECKIN")
+                        || b.getStatus().equals("PENDING_CHECKOUT"))
+                .toList();
         if (!conflicts.isEmpty()){
             throw new RuntimeException("Room not available for selected dates");
         }
